@@ -19,16 +19,18 @@ var score = 0;
 var bg = "sprites/background.jpg";
 //var score = 0;
 var backgroundImg;
+var backgroundImg2;
 
 function preload() {
    // getBackgroundImg();
    backgroundImg = loadImage(bg);
+   backgroundImg2 = loadImage("sprites/background2.png");
 
    candy1I = loadImage("sprites/candy1.png");
    candy2I = loadImage("sprites/candy2.png");
    candy3I = loadImage("sprites/candy3.png");
 
-   stoneImg = loadImage("sprites/rock.png");
+   stoneImg = loadImage("sprites/Bomb.png");
 
    cartImg = loadImage("sprites/bowl.png");
 }
@@ -41,7 +43,7 @@ function setup(){
     candiesGroup = new Group();
     stonesGroup = new Group();
 
-    gameState = "start";
+    gameState = "serve";
 
     ground = createSprite(600,height,1200,20);
 
@@ -50,13 +52,46 @@ function setup(){
     cart.scale = 0.3;
 
 
+
+
     
 }
 
 function draw(){
+    if(gameState === "serve"){
+        background(backgroundImg);
+        fill("black");
+        textSize(30);
+        text("Welcome to Catching Candies", 400, 100);
+
+        fill("black");
+        textSize(20);
+        text("-We need someone to catch candies for our king.",425,200);
+        text("-Can you do it please? We know you will.",425,220);
+        text("-Use the 'LEFT' and 'RIGHT' arrow key to move our basket.",425,240);
+        text("-Catch as many candies you can.",425,260);
+        text("-But beware of the bombs falling. If you catch any of them you will lose.",425,280);
+        textSize(30);
+        text("-GOOD LUCK!",425,330);
+
+        strokeWeight(15);
+        textSize(30);
+        text("Press 'Space' to start", 500,400);
+
+        cart.visible = false;
+        ground.visible = false;
+
+        if(keyDown("space")){
+            gameState = "start";
+        }
+
+    }
 
     if(gameState === "start"){
-        background(backgroundImg);
+        background(backgroundImg2);
+
+        cart.visible = true;
+        ground.visible = true;
 
         noStroke();
         textSize(35)
@@ -86,11 +121,34 @@ function draw(){
 
         }
 
-        if(stone.isTouching(ground)){
-            stone.destroyEach();
+        if(stonesGroup.isTouching(ground)){
+            stonesGroup.destroyEach();
+
+        }
+        if(stonesGroup.isTouching(cart)){
+            stonesGroup.destroyEach();
+            gameState = "over";
 
         }
 
+    }
+
+    if(gameState === "over"){
+        background("pink");
+        fill("black");
+        textSize(50);
+        text("YOU LOSE THE GAME",300,300);
+
+        // textSize(30);
+        // text("Press 'Shift' to play again",300,200);
+
+        // if(keyDown("shift")){
+        //     gameState = "start";
+        // }
+
+        cart.destroy();
+        candies.destroyEach();
+        rock.destroyEach();
     }
     drawSprites();
 
@@ -115,13 +173,15 @@ function candies(){
             case 3: candy.addImage(candy3I);
                     break;
             default: break;
+
+            candy.lifetime = 150;
         }
         candiesGroup.add(candy);
     }
 }
 
 function rock(){
-    if(frameCount % 50 === 0){
+    if(frameCount % 100 === 0){
         var stone = createSprite(0,0,50,50);
         stone.addImage(stoneImg);
         stone.x = random(10,1100);
@@ -129,46 +189,20 @@ function rock(){
         stone.velocityY = 6;
         stone.scale = 0.1;
 
+        var rand = Math.round(random(1,3));
+        switch(rand){
+            case 1: stone.addImage(stoneImg);
+                    break;
+            case 2: stone.addImage(stoneImg);
+                    break;
+            case 3: stone.addImage(stoneImg);
+                    break;
+            default: break;
+
+            stone.lifetime = 150;
+
         
         }
-        //stonesGroup.add(stone);
+        stonesGroup.add(stone);
 }
-
-
-// function mouseDragged(){
-//     //if (gameState!=="launched"){
-//         Matter.Body.setPosition(bird.body, {x: mouseX , y: mouseY});
-//     //}
-// }
-
-
-// function mouseReleased(){
-//     slingshot.fly();
-//     gameState = "launched";
-// }
-
-// function keyPressed(){
-//     if(keyCode === 32 && bird.body.speed<1){
-//         bird.trajectory=[];
-//         Matter.Body.setPosition(bird.body,{x: 200, y: 50});
-//        slingshot.attach(bird.body);
-//     }
-// }
-
-// async function getBackgroundImg(){
-//     var response = await fetch("http://worldtimeapi.org/api/timezone/Asia/Kolkata");
-//     var responseJSON = await response.json();
-
-//     var datetime = responseJSON.datetime;
-//     var hour = datetime.slice(11,13);
-    
-//     if(hour>=06 && hour<=19){
-//         bg = "sprites/background.jpg";
-//     }
-//     else{
-//         bg = "sprites/background.jpg";
-//     }
-
-//     backgroundImg = loadImage(bg);
-//     console.log(backgroundImg);
-// }
+}
